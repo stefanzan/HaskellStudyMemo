@@ -163,8 +163,92 @@ Advantage:
  
  So, you can see another constraints: you can not get another g b. you can only get a new f b.		
 
+## *fmap* and <$>
 
+in **Control.Applicative** module, it contains an operator *<$>* that is an alisa for *fmap*.
 
+## Flexible instances
+
+If you want to write a **Functor** instance for the type like *Either Int b*, which has one type parameter.
+
+		instance Functor (Either Int) where
+			fmap _ (Left l) = Left l
+			fmap f (Right r) = Right (f r)
+
+Note: since the type system (Haskell 98 standard ?) cannot guarantee that checking the constraints on such an instance will terminate. So instances of this form are formidden.
+
+But you can add (GHC type system ?) special *compiler directive*.
+
+	{-# LANGUAGE FlexibleInstances #-} 
+
+## Rules of Functor
+
+* A functor must preserve identity.
+  
+  fmap id = id
+
+* Functors must be composable.
+  
+  fmap (f . g) = fmap f . fmap g
+ 
+ If you are writing a **Functor** instance, you shall keep these rules in mind, because the compiler can't check the rules.
+  
+  
+## You must be careful about the indentation
+example:
+
+		parseByte :: Parse Word8
+		parseByte =
+  			getState ==> \initState ->
+  			case L.uncons (string initState) of
+    			Nothing -> 
+        				bail "no more input"
+    			Just (byte, remainder) ->
+        				putState newState ==> \_ -> identity byte
+      				where newState = initState { string = remainder, offset = offset initState + 1 }
+  
+  
+The key point is the last three lines: in the just pattern, the `putState ...` has a bit more indentation than the `where ...`. And you still need to be careful that the `where...` indents more compared whth the `Just ...` line.  
 			
 
-  
+## Multipul Functor instance in me func
+
+
+* First:
+
+		w2c :: Word8 -> Char
+		w2c = chr . fromIntegral
+
+  		parseChar :: Parse Char
+  		parseChar = w2c <$> parseByte
+
+Note: on the right hand of <$> is a parseByte, the type is **Parse Word8**. The left hand is a function from *Word8 -> Char*. 
+
+The <$> is instantiated to **Parse Word8**. 
+So the type is : <$> :: Parse Word8 -> (Word8 -> Char) -> Parse Char
+
+		peekByte :: Parse (Maybe Word8)
+		peekByte = (fmap first . L.uncons . string) <$> getState
+
+* <$> is Parse Functor instance 
+
+   		<$> :: Parse ParseState -> (ParseState -> Maybe Word8) -> Parse (Maybe Word8)
+
+* fmap is Maybe Functor instance
+
+   		fmap :: Maybe (Word8, ByteString) -> ((Word8, ByteString) -> Word 8) -> Maybe Word8
+   
+ In total, on the other hand,  Parse (Maybe Word8) is a functor withn a functor. Thus have to lift a function twice to "get it into" the inner functor.
+ 
+ 
+## Functions of Array
+
+	null :: [a] -> Bool
+	
+	read ::  Read a => String -> a
+	
+	e.g. 
+	>read "123" :: Int
+	> 123   
+	
+	
