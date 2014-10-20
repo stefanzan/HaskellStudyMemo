@@ -1,0 +1,10 @@
+# View.hs
+
+    data View m a where
+      View :: (Monad m , Eq b) => PutLensM m a b -> Type b -> View m a
+**Q**:
+
+  *  Type b is a source type ?
+  *  View m a is the type representation for view ?
+
+  

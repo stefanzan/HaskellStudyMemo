@@ -1,0 +1,29 @@
+# ViewPf.hs
+
+    data ViewPf m a where
+      ViewPf :: Eq b => Pf (PutlensM m a b) -> Type b -> ViewPf m a
+
+## Pf
+
+    data Pf a where
+        RunReaderPutS
+        WithReaderPut
+        WithS
+        WithMbS
+        ..
+        IdPut
+        ..
+        KeepfstPut
+        KeepsndPut
+        ...
+        AlignKeyPut
+        AlignPosPut
+        ...
+        DynPut
+        UnDynPut
+        ToStringPut
+        FromStringPut
+
+## invert an isomorphism
+
+    inv :: (MonadPlus m, Monad lensm) => Type (PutlensM lensm a b) -> Pf (PutlensM lensm a b) -> m (Pf (PutlensM lensm b a))        
