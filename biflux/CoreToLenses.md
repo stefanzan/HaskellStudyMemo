@@ -123,3 +123,8 @@ mapM f is equivalent to sequence . map f.
 ### cprocedure2lens
 
 ### cprocedureStmt2lens
+
+
+### cstmt2lens
+
+start from this is the core part, every statement to lens.
