@@ -1,0 +1,57 @@
+# Understanding Monads
+
+* *do* is actually just syntatic sugar over monads.
+
+## Definition
+
+three things:
+
+  * a type constructor M;
+  * a function return;
+  * an operator (>>=) which is pronounced "bind"
+
+
+    return :: a -> M a
+    (>>=) ::  M a -> (a -> M b) -> M b
+
+
+* (>>) operator is called 'then'.
+
+## Monad laws and one good point
+
+    m >>= return       = m   -- right unit.
+    return x >>= f     = f x
+
+
+  * a good point
+
+        maternalGrandfather p = do
+          mom <- mother p
+          gf  <- father mom
+          return gf
+
+has an simpler version:
+
+
+        maternalGrandfather p = do
+          mom <- mother p
+          father mom
+
+This is because of the first law.
+
+## Something about *do* notation.
+
+      bothGrandfathers p = do {
+        dad <- father p;
+        fg1 <- father dad;
+        mom <- mother p;
+        gf2 <- father mom;
+        return (fg1, gf2);
+      }
+
+*father* and *mother* are functions that might fail to produce results.
+When that happens, the whole do block will fail. i.e. terminate with an exception.
+
+       let x = foo in x + 3  <====> (\x -> x + 3) foo
+
+       x <- foo; return (x + 3) <=====> foo >>= (\x -> return (x + 3))
