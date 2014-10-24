@@ -1,4 +1,4 @@
 HaskellStudyMemo
 ================
 
-**<span style="color: green">Try to be hehehe</a>**
+**<span style="color: green">Try to be Niubility</a>**
