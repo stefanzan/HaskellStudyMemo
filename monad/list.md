@@ -25,3 +25,5 @@ so we can do the following:
 **This is a new. previously we only consider one thing insider the monad container, now in side have a list of elements.
 it will apply the function a->[b] for each element inside.
 **
+
+2014.11.04: This is because of the implementation of bind which uses a map to xs with f.

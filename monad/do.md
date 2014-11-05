@@ -56,7 +56,7 @@ For instance, Maybe has fail \_ = Nothing; for the list moand, fail \_ = [].
 
        nameReturn :: IO String
        greetAndSeeYou :: IO ()
-       greetAndSeeYou = nameReturn >>= \ name -> putStrLN ("See you, " ++ name ++ "!")
+       greetAndSeeYou = nameReturn >>= \ name -> putStrLn ("See you, " ++ name ++ "!")
 so, this code needs a lambda, which is not so good.
 
 suppose we have:

@@ -4,7 +4,7 @@ instance Monad m => Monad (MaybeT m) where
 --  return = MaybeT . return . Just
   return = MaybeT . return . return
 --  (>>=) :: MaybeT m a -> ( a -> MaybeT m b) -> MaybeT m b
---  x >>= f = MaybeT $ 
+--  x >>= f = MaybeT $
 --    runMaybeT x >>= \maybeValue -> | Nothing = return Nothing
 --                                   | Just v  = runMaybeT $ f v
   x >>= f = MaybeT $ do maybeValue <- runMaybeT x
@@ -15,10 +15,10 @@ instance Monad m => Monad (MaybeT m) where
 instance Monad m => MonadPlus (MaybeT m) where
   mzero = MaybeT $ return Nothing
   mplus x y = MaybeT $  do maybeValue <- runMaybeT x
-                           case maybeValue of 
+                           case maybeValue of
                              Nothing -> runMaybeT y
-                             Just _  -> return maybeValue 
+                             Just _  -> return maybeValue
 
 instance MonadTrans MaybeT where
-  lift = MaybeT . (liftM Just)                          
+  lift = MaybeT . (liftM Just)
      

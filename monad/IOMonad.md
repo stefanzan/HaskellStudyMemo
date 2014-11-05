@@ -20,6 +20,11 @@ not changed, while the state of the universe world changed.
 
       sequence :: (Monad m ) => [m a] -> m [a] -- Prelude
 
+      Prelude Data.Maybe> sequence [Just 1, Nothing, Just 2]
+      Nothing
+      Prelude Data.Maybe> sequence [Just 1,  Just 2]
+      Just [1,2]
+
       >:t replicate
       > replicate :: Int -> a -> [a]
       > let fiveGetLines = replicate 5 getLine

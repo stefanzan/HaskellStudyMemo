@@ -4,7 +4,7 @@ Amagamate all valid solutions into a single result.
 My observation from the follow subsections are :
 * List MonadPlus return all successful results.
 * Maybe MonadPlus return only one, even if both are success.
-* Either e is the same as Maybe.
+* **Either e** is the same as Maybe.
 
 ## Definition
 
@@ -14,13 +14,15 @@ My observation from the follow subsections are :
 * mzero is the monadic value standing for zero results.
 * mplus is a binary function which combines two computations.
 
-List MonadPlus
+2014.11.05 Note: I dont't understand the usefullness of mzero and mplus.
+
+#### List MonadPlus
 
     instance MonadPlus [] where
       mzero = []
       mplus = (++)
 
-Maybe MondPlus
+#### Maybe MondPlus
 
     instance MonadPlus Maybe where
       mzero = Nothing
@@ -29,7 +31,7 @@ Maybe MondPlus
       Just x  `mplus` Nothing = Just x
       Just x  `mplus` Just y  = Just x
 
-Control.Monad.Error
+### Control.Monad.Error
 
     instance (Error e) => MonadPlus (Either e) where
       mzero = Left noMsg
@@ -64,6 +66,8 @@ Control.Monad.Error
 ## The MonadPlus Laws
 **mzero and mplus form a monoid**
 
+2014.11.05: what is monoid ? the difference between monad and monoid.
+
 * mzero is a neutral element.
       mzero `mplus` m = m
       m `mplus` mzero = m
@@ -78,11 +82,11 @@ Control.Monad.Error
     mzero >>= f = mzero
     f >>= mzero = mzero
 
-    (m `mplus` k) >>= k    = (m >>= k) `mplus` (m >>= k)
+    (m `mplus` n) >>= k    = (m >>= k) `mplus` (n >>= k)
 
 ## Useful functions
 
-### function: msum
+### Function: msum
 
     msum :: MonadPlus m => [m a] -> m a
     msum = foldr mplus mzero
@@ -99,7 +103,7 @@ Control.Monad.Error
 So, the different behavior is because of the definition of mplus.
 Maybe mplus chooses the first one; [] mplus concats all of them.
 
-### function: guard
+### Function: guard
 #### An example of using guard
     pythags = do
       x <- [1..]

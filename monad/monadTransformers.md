@@ -4,17 +4,23 @@ The motivation is to use several monads at once.
 
 ## some library functions
 
-Dat.Maybe
+Data.Maybe
 
      isJust :: Maybe a -> Bool
      isNothing :: Maybe a -> Bool
 
-## Example: MaybeT
+## MT Example: MaybeT
+
+A monad including another Maybe monad.
 
     newtype MaybeT m a = MaybeT { runMaybeT :: m (Maybe a)}
 
+Monad Transformer is in fact another Monad, thus we have Monad declaration ** instance Monad (MaybeT m) where.... **.
+
     instance Monad m => Monad (MaybeT m) where
       return = MaybeT . return . return
+
+So you still need to define **return**, **bind** and **then** operators.
 
 ### return
 
@@ -26,7 +32,8 @@ Dat.Maybe
       instance Monad m where
         return :: a -> m a
         (>>=) :: m a -> (a -> m b) -> m b
-    So, the a is infact the type parameter of the typeclass m. If m in  *Monad m* is CName, then the a in return function is the a in *CName a*.
+
+  So, the **a** is in fact the type parameter of the typeclass m. If m in  *Monad m* is CName, then the a in return function is the a in *CName a*.
 
   Thus for the Monad instance *Monad (MaybeT m)*, the type of return is
 
@@ -48,6 +55,8 @@ Dat.Maybe
 ### (>>=)
 
 First recall the definition of MaybeT, and we add the implementation of >>=.
+
+2014.11.05: use newtype to define a newtype can be instantiated to a Monad.
 
     newtype MaybeT m a = MaybeT { runMaybeT :: m (Maybe a)}
 
@@ -71,7 +80,24 @@ First recall the definition of MaybeT, and we add the implementation of >>=.
 
   The do block must be in the m monad, not in MaybeT m. Because the MaybeT m lacks a defined bind operator at this point.
 
- ## One hard point: MonadTrans
+
+2014.11.05: the type of (>>=) in Monad (MaybeT m) is:
+
+    (>>=) :: MaybeT m a -> (a -> m b) -> MaybeT m b.
+
+One important note is in:
+
+    x >>= f.
+
+The type of f is :
+
+    f :: a -> m b.
+
+Not
+
+    f :: a -> MaybeT m b
+
+## One hard point: MonadTrans
 
       instance MonadTrans MaybeT where
          lift =  MaybeT . liftM  Just  
@@ -100,7 +126,8 @@ My explanation is :
 
 **Q**: according to this, why not implement lift like this:
 
-    lift = MaybeT **!!!**
+    lift = MaybeT
+  **!!!**
 
 I think this is because: instance MonadTrans MaybeT where ...
 means you give me a m with inner type a, I try to manage to get a MaybeT m a. So
@@ -110,6 +137,15 @@ you need to find a way to use a
 
 **Comment**: I still don't think liftM is correct here. As the input of liftM is *m a1*.
 
+2014.11.05(review this memo): generally, the type of lift is:
+
+    lift :: m a -> t m a
+
+the type of lift for MaybeT is:
+
+    lift :: m a -> MaybeT m (Maybe a)
+
+So, you need a liftM to get a inside m and then return Maybe a, and finally wrapped it when m. Lastly, use MaybeT to construct the MaybeT m (Maybe a).
 
 **mark**： got it. [2014-10-22 10:56]
 
@@ -128,6 +164,27 @@ But here the input is m a, while the output is t m (Maybe a)
 The only possible reason is:
 
     lift m = MaybeT $ m >>= liftM Just
+
+2014.11.05: this is not correct. Since the type of >>= is:
+
+     m >>= f :: m a -> (a -> m(Maybe a)) -> m (Maybe a)
+
+So the type of f shall be a ->m (Maybe a). While The type of liftM is :
+
+     (a1 -> r) -> m a1 -> m r
+
+So the type of liftM Just is:
+
+     m a -> m (Maybe a)
+
+While the needed type is a
+
+You shall write:
+
+    lift m = MaybeT $ liftM Just m
+
+
+So always remember: the type of f is : from inner value to a new wrapped value.
 
 **TODO**
 
@@ -159,7 +216,7 @@ And
 ** use lifting operations to bring functions from the inner monad into the combined monad.**
 
      class MonadTrans MaybeT where
-       lift :: (Monad m) => m a -> t m a
+       lift :: (Monad m) => m a -> MaybeT m (Maybe a)
 
 
 Another special case:

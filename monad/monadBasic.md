@@ -61,7 +61,7 @@ When that happens, the whole do block will fail. i.e. terminate with an exceptio
     (m  >>= f ) >>= g   =    m >>= (\x -> f x >>= g)
 
   **Q**:
-    why use \x -> fx ?
+    why use \x -> f x ?
 
 This is because (you can see from the type definition of >>=)
 
@@ -87,6 +87,10 @@ The type of (>=>) is:
 ## Start with monads as functors
 
      fmap   :: (a -> b) -> M a -> M b
+
+   correct case:
+
+     fmap :: Functor f => (a->b) - f a -> f b
 
      return :: a -> M a
      join   :: M (M a) -> M a
