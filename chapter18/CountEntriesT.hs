@@ -1,6 +1,6 @@
-module CountEntriesT 
+module CountEntriesT
 (
-  listDirectory, 
+  listDirectory,
   countEntries
 ) where
 
@@ -13,8 +13,8 @@ import Control.Monad.Writer (WriterT, tell)
 
 countEntries :: FilePath -> WriterT [(FilePath, Int)] IO ()
 countEntries path = do
-  contents <-  liftIO . listDirectory $ path
-  tell [(path, length contents)]
+  contents <-  (liftIO . listDirectory $ path)
+  (tell :: ()) [(path, length contents)]
   forM_ contents $ \name -> do
     let newName = path </> name
     isDir <- liftIO . doesDirectoryExist $ newName

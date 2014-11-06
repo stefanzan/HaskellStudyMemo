@@ -12,6 +12,8 @@
 
     forM_ :: Monad m => [a] -> (a -> m b) -> m ()
 
+    forM :: Monad m => [a] -> (a -> m b) -> m [b]
+
     when :: Monad m => Bool -> m () -> m ()
 
     liftM :: Monad m => (a -> r) -> m a -> m r
@@ -27,8 +29,11 @@ what is MonadIO ?
 
 #### Control.Monad.Writer
 
+    type Writer w = WriterT w Data.Functor.Identity.Identity
     WriterT :: m (a, w) -> WriterT w m a
     tell :: MonadWriter w m => w -> m ()
+
+The difference between Writer and WriterT is that: WriterT is a transformer, thus it has one more type parameter m.
 
 what is WriterT ?
 
@@ -44,12 +49,34 @@ what is MonadWriter ?
 
 **TODO**: too hard !
 
+What is the difference between Writer, MonadWriter ?
 
+    type Writer w = WriterT w Identity
+
+    class MonadWriter w m ....
+      tell :: w -> m ()
+
+Because
+
+    Instance MonadWriter w (WriterT w m)
+
+so the type of tell can be:
+
+    tell :: w -> Writer w m ()
 
 #### WriterT
 
     runWriterT :: WriterT w m a -> m (a, w)
     execWriterT :: (Monad m) => WriterT w m a -> m w
+
+#### Writer
+
+    writer :: Monad m => (a , w) -> WriterT w m a
+
+Why writer is used to construct a WriterT and the definiton of Writer is based on WriterT ?
+
+    runWriter :: Writer w a -> (a, w)
+    execWriter :: Writer w a -> w
 
 
 ### Learning from Code
@@ -68,31 +95,60 @@ You could not remove the ($). If removing, then it is incorrect. Since the compo
 
 * ($)的优先级低于(.)
 
+* The type of liftIO here is :
+
+      liftIO :: IO [String] -> WriterT [(FilePath, Int)] IO [String]
+
+* the type of tell is:
+
+      tell :: [(FilePath, Int)] -> WriterT [(FilePath, Int)] IO ()
+
+
+
+
+
 ### Common patterns in monads and monad transformers
+
+* MonadRader defines the API for the reader monad
+
+* MonadWriter defines the API for the writer monad
 
 #### MonadReader
 
     class (Monad m) => MonadReader r m | m -> r where
       ask :: m r
       local :: (r -> r) -> m a -> m a
+      reader :: (r -> a) -> m a
+
+    instance Monad m => MonadReader r (ReaderT r m)
 
 * type variable r represents the immutable state.
 * Reader r monad is an instance of the MonadReader class. as is the ReaderT r m monad transformer.
 
 * the *local* function temporarily modifies the current environment using the r -> r function, and executes its action in the modified environment.
 
+* Question: what is m -> r means in MonadReader ?
+
+  referrr: https://www.haskell.org/ghc/docs/latest/html/users_guide/type-class-extensions.html#functional-dependencies
+
+* Read it later: Type Families
+
+  referrer: https://www.haskell.org/ghc/docs/latest/html/users_guide/type-families.html  
 
 ### StateT
 
      newtype StateT s m a = StateT { runStateT :: s -> m (a, s)}
+     type State s = StateT s Identity
 
 ### ReaderT
 
      newtype ReaderT r m a = ReaderT { runReaderT :: r -> m a }
 
+     type Reader r = ReaderT r Data.Functor.Identity.Identity
+
 ### WriterT
 
      newtype WriterT w m a = WriterT { runWriterT :: m (a, w)}
-
+     type Writer w = WriterT w Identity
 
 ### Stacking multiple monad transformers

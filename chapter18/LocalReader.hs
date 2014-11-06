@@ -1,8 +1,13 @@
 import Control.Monad.Reader
 
+-- ask :: ReaderT String Identity [Char]
+
+-- myName :: String -> ReaderT String Identity String
 myName step = do
   name <- ask
   return (step ++ ", I am " ++ name)
+
+
 
 localExample :: Reader String (String, String, String)
 localExample = do
@@ -10,4 +15,3 @@ localExample = do
   b <- local (++ "dy") (myName "Second")
   c <- myName "Third"
   return (a, b, c)
-  
