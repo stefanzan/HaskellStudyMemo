@@ -152,3 +152,49 @@ You could not remove the ($). If removing, then it is incorrect. Since the compo
      type Writer w = WriterT w Identity
 
 ### Stacking multiple monad transformers
+
+#### Learn from coding (UglyStack.hs)
+
+* Defining a new type with type keyword.
+
+      type App = ReaderT AppConfig (StateT AppState IO)
+
+
+You'd better not use : type App2 a = ... a; As it will not support construcing another new Monad Transformer. E.g. WriterT [String] App2 a is not ok.
+
+This is because Haskell does not allow partially apply a type synomym.
+
+* defining the runApp function
+
+      runApp :: App a -> Int -> IO (a, AppState)
+      runApp k maxDepth =
+          let config = ... -- basic config
+              state = ...  -- initial state
+          in runStateT (runReaderT k config) state
+
+* You can call the function of StateT at any where in this monad.
+
+    Detail: refer to UnglyStack.hs.
+
+### Large Deriving
+
+      newtype MyApp a = MyA {
+        runA :: ReaderT AppConfig (StateT AppState IO) a
+      } deriving (Monad, MonadIO, MonadReader AppConfig, MonadState AppState)
+
+** The large deriving clause requires the GeneralizedNewtypeDeriving language pragma**
+
+
+### Control.Monad.Trans
+
+      class MonadTrans t where
+        -- | Lift a computation from the argument monad to the constructed monad.
+        lift :: (Monad m) => m a -> t m a
+
+* Every monad transformer is an instance of MonadTrans
+
+* A comparasion
+
+      fmap :: (Functor f) => (a -> b) -> f a -> f b
+      liftM :: Monad m => (a -> b) -> m a -> m b
+      lift :: (Monad m, MonadTrans t)=> m a -> t m a

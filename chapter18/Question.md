@@ -5,8 +5,7 @@
       ask :: (Monad m) => ReaderT r m r
       ask = ReaderT return
 
-
- The type of return is ?
+    The type of return is ?
 
       return :: r -> m r
 
@@ -16,9 +15,9 @@
       reader :: (Monad m) => (r -> a) -> ReaderT r m a
       reader f = ReaderT (return . f)
 
-The meaning of reader is : using  f :: r -> a. Then using return to get m a. Finally using ReaderT to construct ReaderT r m a.
+  The meaning of reader is : using  f :: r -> a. Then using return to get m a. Finally using ReaderT to construct ReaderT r m a.
 
-Or thinking in another way: return . f :: r -> m a.
+  Or thinking in another way: return . f :: r -> m a.
 
       local :: (Monad m) => (r -> r) -> ReaderT r m a -> ReaderT r m a
       local = withReaderT
@@ -31,8 +30,15 @@ Or thinking in another way: return . f :: r -> m a.
 
       newtype Reader r a = Reader { runReader :: r -> a}
 
+Suppose we have a reader readerM, if you give me the environment r. I will give you the a you want by using
+
+      runReader readerM r
+
+ReaderT is the Monad Transformer for Reader. Suppose we have a reader transformer readerTM, if you give me an environment r, I will give you the value wrapped by the monad m.
+
       newtype ReaderT r m a = ReaderT { runReaderT :: r -> m a}
 
+      runReaderT readerTM r :: m aM
 
 * Control.Monad.Reader.Class
 
@@ -45,7 +51,7 @@ Or thinking in another way: return . f :: r -> m a.
           r <- ask
           return $ f r
 
-
+We define a Monad for Reader, we call it MonadReader.
 
 
 * ReaderT r m is an instance of MonadReader r m, so as Reader r
